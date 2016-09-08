@@ -17,8 +17,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    TbAdvertiseView *advert = [[TbAdvertiseView alloc] init];
-     advert.adverseImageViewUrl = @"mine_icon_nearby";
+    TbAdvertiseView *advert = [[TbAdvertiseView alloc] initWithAdWidth:self.view.bounds imageUrl:@"http://photocdn.sohu.com/20160908/Img467989565.jpeg" adType:TbAdvertiseTypeByNetWorking];
+    
     advert.frame = self.view.bounds;
     [self.view addSubview:advert];
     [advert show];

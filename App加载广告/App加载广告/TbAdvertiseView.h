@@ -9,9 +9,16 @@
 #import <UIKit/UIKit.h>
 
 @interface TbAdvertiseView : UIView
+typedef NS_ENUM(NSInteger, TbAdvertiseType)
+{
+    TbAdvertiseTypeByPicture,
+    TbAdvertiseTypeByNetWorking
+};
+@property (nonatomic,assign)TbAdvertiseType advertiseType;
 
 @property (nonatomic,strong)UIImageView *advetiseImageView;
 @property (nonatomic,copy)NSString *adverseImageViewUrl;
 
+- (instancetype)initWithAdWidth:(CGRect)rect imageUrl:(NSString *)imageUrl adType:(TbAdvertiseType)adType;
 - (void)show;
 @end

@@ -8,12 +8,18 @@
 //  Copyright © 2016年 Tb. All rights reserved.
 //
 
+
+
 #define XMGScreenW [UIScreen mainScreen].bounds.size.width
 #define XMGScreenH [UIScreen mainScreen].bounds.size.height
 
 #import "TbAdvertiseView.h"
 #import "UIView+XMGExtension.h"
+#import <UIImageView+WebCache.h>
+
 @interface TbAdvertiseView()
+
+
 @property (nonatomic,strong)UIButton *showTimeButton;
 /**定时器*/
 @property (nonatomic, strong) NSTimer *countTimer;
@@ -31,19 +37,16 @@ static int  totalAdterTime = 5;
     }
     return _countTimer;
 }
-- (void)setAdverseImageViewUrl:(NSString *)adverseImageViewUrl
-{
-    _adverseImageViewUrl = [adverseImageViewUrl copy];
-}
+//- (void)setAdverseImageViewUrl:(NSString *)adverseImageViewUrl
+//{
+//    _adverseImageViewUrl = [adverseImageViewUrl copy];
+//    NSLog(@"setAdverseImageViewUrl:%@",_adverseImageViewUrl);
+//}
+
 - (UIImageView *)advetiseImageView
 {
     if (!_advetiseImageView) {
-        _advetiseImageView = [[UIImageView alloc] init];
-        [_advetiseImageView setImage:[UIImage imageNamed:@"mine_icon_nearby"]];
-        _advetiseImageView.userInteractionEnabled = YES;
-        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(PushTo)];
-        [_advetiseImageView addGestureRecognizer:tapGesture];
-    }
+         }
     return _advetiseImageView;
 }
 
@@ -79,18 +82,50 @@ static int  totalAdterTime = 5;
     }];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame
+- (instancetype)initWithAdWidth:(CGRect)rect imageUrl:(NSString *)imageUrl adType:(TbAdvertiseType)adType
 {
-    if (self = [super initWithFrame:frame]) {
+    self = [super init];
+    if (self) {
+        if (adType == TbAdvertiseTypeByPicture) {// 本地图片
+            self.adverseImageViewUrl = imageUrl;
+        } else {// 网络图片
+            //利用SDWerbImage下载图片到沙盒，获取图片在沙盒的位置，付给图片
+            
+            self.adverseImageViewUrl = [self downloadImage:imageUrl];
+            NSLog(@"----------------------------------------------%@",self.adverseImageViewUrl);
+        }
         // 添加广告图片
-      [self addSubview:self.advetiseImageView];
+        [self addSubview:self.advetiseImageView];
         // 跳过按钮
         [self addSubview:self.showTimeButton];
-        
-
     }
     return self;
 }
+- (NSString *)downloadImage:(NSString *)url
+{
+   __block NSString *cacheImagePath = nil;
+    
+    SDWebImageManager *manager = [SDWebImageManager sharedManager];
+    [manager downloadImageWithURL:[NSURL URLWithString:url] options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+        
+    } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+        if (image) {
+            NSLog(@"%@,%@",image,imageURL);
+            NSLog(@"cache:%@",[manager cacheKeyForURL:[NSURL URLWithString:url]]);
+            BOOL isExit = [manager diskImageExistsForURL:imageURL];
+            if (isExit) {
+                NSString *cacheImageKey = [[SDWebImageManager sharedManager] cacheKeyForURL:[NSURL URLWithString:url]];
+                if (cacheImageKey.length) {
+                    cacheImagePath = [[SDImageCache sharedImageCache] defaultCachePathForKey:cacheImageKey];
+                    NSLog(@"cachePath:%@",cacheImagePath);
+                }
+
+            }
+        }
+    }];
+    return cacheImagePath;
+}
+
 - (void)layoutSubviews
 {
     [super layoutSubviews];
